@@ -62,9 +62,9 @@
               <!-- Single Lyrics -->
             <div class="single-lyrics text-center">
                 <button class="btn go-back">&lsaquo;</button>
-                <h2 class="text-success mb-4">Pentatonix - Na Na Na</h2>
-                <pre class="lyric text-white">
-                    Gonna feel like! (Na na na...)
+                <h2 id="lyricsTitle" class="text-success mb-4"></h2>
+                <pre id="show-lyrics" class="lyric text-white">
+                    
                 </pre>
             </div>
 
@@ -81,49 +81,51 @@
     const srcBtn = document.getElementById('srcBtn');
     srcBtn.addEventListener('click',function(){
         const srcBox = document.getElementById('srcBox').value;
-        //console.log(srcBox);
+        
         fetch(`https://api.lyrics.ovh/suggest/${srcBox}`)
             .then(res=>res.json())
             .then(data=>{
                 for(var i=0;i<10;i++){
-                    //console.log(data);
-                    albumName = data.data[i].album.title;
-                    title = data.data[i].title;
-                    artistName = data.data[i].artist.name;
+                    // get album ans artist name
+                    let albumName = data.data[i].album.title;
+                    let artistName = data.data[i].artist.name;
 
-                    singleResultDiv = document.createElement('div');
+                    // single result div with classes
+                    const singleResultDiv = document.createElement('div');
                     singleResultDiv.classList.add('single-result','row','align-items-center','my-3','p-3');
                     
-
-                    artistAlbumSide = document.createElement('div');
+                    // make Album and Artist name area and show value
+                    const artistAlbumSide = document.createElement('div');
                     artistAlbumSide.className = 'col-md-9';
 
-                    lyricsName = document.createElement('h3');
+                    const lyricsName = document.createElement('h3');
                     lyricsName.className = 'lyrics-name';
                     lyricsName.innerText = albumName;
-                    author = document.createElement('p');
+
+                    const author = document.createElement('p');
                     author.classList.add('author','lead');
                     author.innerHTML = artistName;
 
                     artistAlbumSide.appendChild(lyricsName);
                     artistAlbumSide.appendChild(author);
 
+                    // append artistAlbumSide to single result
                     singleResultDiv.appendChild(artistAlbumSide);
 
                     
-
-                    getLyricsSide = document.createElement('div');
+                     // make lyrics button area 
+                    const getLyricsSide = document.createElement('div');
                     getLyricsSide.classList.add('col-md-3', 'text-md-right' ,'text-center');
-                    getLyricsBtn = document.createElement('button');
+                    const getLyricsBtn = document.createElement('button');
                     getLyricsBtn.classList.add('btn','btn-success','getLyric');
                     getLyricsBtn.innerText = 'Get Lyrics';
                     getLyricsBtn.setAttribute('onclick', 'getLyrics(event)');
-
-                    
-
                     getLyricsSide.appendChild(getLyricsBtn);
+
+                    // append getLyricsSide to single result
                     singleResultDiv.appendChild(getLyricsSide);
 
+                    //append singleResultDiv to main div 
                     document.getElementById('search-result-box').appendChild(singleResultDiv);
 
                    
@@ -141,18 +143,32 @@
     })
 
    
-    
+    // receive event after click get Lyrics button then find album name & artist name from event and use those to request to api 
      getLyrics = event =>{
      let getAlbumArtistName =  event.path[2].childNodes[0];
      let getAlbumName = getAlbumArtistName.childNodes[0].innerText;
-     let getArtistName = getAlbumArtistName.childNodes[0].innerText;
+     let getArtistName = getAlbumArtistName.childNodes[1].innerText;
      
      
 
        
-     fetch(`https://api.lyrics.ovh/v1/${artistName}/${albumName}`)
+     fetch(`https://api.lyrics.ovh/v1/${getArtistName}/${getAlbumName}`)
         .then(res=>res.json())
-        .then(data=> console.log(data));
+        .then(data=> {
+            let lyricsTitle = data.lyrics.slice(0,22);
+            document.getElementById('lyricsTitle').innerText = lyricsTitle;
+            let lyrics = data.lyrics;
+            document.getElementById('show-lyrics').innerText = lyrics;
+           
+
+        })
+        .catch(err => {
+            error = "Server not response";
+            document.getElementById('lyricsTitle').innerText = "";
+            document.getElementById('show-lyrics').innerText = error;
+
+
+        })
     }
 </script>
 </body>
